@@ -1,6 +1,6 @@
 
 /*
- * *** YOUR NAME GOES HERE / YOUR SECTION NUMBER ***
+ * *** Alex Parker / COMP 272/400C-002 - Spring 2025 ***
  *
  * This java file is a Java object implementing simple AVL Tree.
  * You are to complete the deleteElement method.
@@ -342,25 +342,52 @@ class LUC_AVLTree {
      */
 
     private Node deleteElement(int value, Node node) {
+        if (node == null) return node;
 
-        /*
-         * ADD CODE HERE
-         * 
-         * NOTE, that you should use the existing coded private methods
-         * in this file, which include:
-         *      - minValueNode,
-         *      - getMaxHeight,
-         *      - getHeight,
-         *      - getBalanceFactor,
-         *      - LLRotation
-         *      - RRRotation,
-         *      - LRRotation,
-         *      - RLRotation.
-         *
-         * To understand what each of these methods do, see the method prologues and
-         * code for each. You can also look at the method InsertElement, as it has do
-         * do many of the same things as this method.
-         */
+        // Step 1: Perform standard BST delete
+        if (value < node.value) {
+            node.leftChild = deleteElement(value, node.leftChild);
+        } else if (value > node.value) {
+            node.rightChild = deleteElement(value, node.rightChild);
+        } else {
+            // Node with only one child or no child
+            if (node.leftChild == null || node.rightChild == null) {
+                Node temp = (node.leftChild != null) ? node.leftChild : node.rightChild;
+                if (temp == null) {
+                    temp = node;
+                    node = null;
+                } else {
+                    node = temp;
+                }
+            } else {
+                // Node with two children: Get the inorder successor (smallest in the right subtree)
+                Node temp = minValueNode(node.rightChild);
+                node.value = temp.value;
+                node.rightChild = deleteElement(temp.value, node.rightChild);
+            }
+        }
+
+        if (node == null) return node;
+
+        // Step 2: Update height of the node
+        node.height = getMaxHeight(getHeight(node.leftChild), getHeight(node.rightChild)) + 1;
+
+        // Step 3: Get balance factor
+        int balance = getBalanceFactor(node);
+
+        // Step 4: Balance the tree
+        if (balance > 1 && getBalanceFactor(node.leftChild) >= 0) {
+            return LLRotation(node);
+        }
+        if (balance > 1 && getBalanceFactor(node.leftChild) < 0) {
+            return LRRotation(node);
+        }
+        if (balance < -1 && getBalanceFactor(node.rightChild) <= 0) {
+            return RRRotation(node);
+        }
+        if (balance < -1 && getBalanceFactor(node.rightChild) > 0) {
+            return RLRotation(node);
+        }
 
         return node;
     }
